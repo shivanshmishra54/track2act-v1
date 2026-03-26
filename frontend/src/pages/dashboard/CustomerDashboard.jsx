@@ -36,15 +36,15 @@ export default function CustomerDashboard() {
   const getStatusColor = (status) => {
     switch (status) {
       case "DELIVERED":
-        return "bg-green-100 text-green-800"
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
       case "IN_TRANSIT":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200"
       case "PENDING":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200"
       case "DELAYED":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200"
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-muted text-muted-foreground"
     }
   }
 

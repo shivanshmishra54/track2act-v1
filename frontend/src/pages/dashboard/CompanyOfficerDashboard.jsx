@@ -109,122 +109,101 @@ export default function CompanyOfficerDashboard() {
 
   const getStatusColor = (status) => {
     const colors = {
-      DELIVERED: "bg-green-100 text-green-800",
-      IN_TRANSIT: "bg-blue-100 text-blue-800",
-      PENDING: "bg-yellow-100 text-yellow-800",
-      DELAYED: "bg-red-100 text-red-800",
+      DELIVERED: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200",
+      IN_TRANSIT: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200",
+      PENDING: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200",
+      DELAYED: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200",
     }
-    return colors[status] || "bg-gray-100 text-gray-800"
+    return colors[status] || "bg-muted text-muted-foreground"
   }
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-700 bg-clip-text text-transparent">
-              Shipment Management
-            </h1>
-            <p className="text-gray-600 mt-2">Create, manage, and track shipments for your organization</p>
+      <motion.div 
+        className="border-b border-border/50 bg-background/95 backdrop-blur-sm sticky top-0 z-10"
+        initial={{ opacity: 0, y: -20 }} 
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <div className="p-4 lg:p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Shipment Management</h1>
+              <p className="text-sm text-muted-foreground mt-1">Create, manage, and track shipments for your organization</p>
+            </div>
+            <motion.div whileHover={{ scale: 1.05 }} className="flex gap-2">
+              <Button onClick={fetchShipments} variant="outline" className="gap-2">
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </Button>
+              <Button onClick={() => setShowCreateForm(!showCreateForm)} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+                <Plus className="w-4 h-4" />
+                New Shipment
+              </Button>
+            </motion.div>
           </div>
-          <motion.div whileHover={{ scale: 1.05 }}>
-            <Button onClick={fetchShipments} variant="outline" className="gap-2 mr-2">
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </Button>
-            <Button onClick={() => setShowCreateForm(!showCreateForm)} className="gap-2">
-              <Plus className="w-4 h-4" />
-              New Shipment
-            </Button>
-          </motion.div>
         </div>
       </motion.div>
 
+      {/* Main Content */}
+      <div className="p-4 lg:p-6 space-y-8">
+
       {/* Stats Grid */}
-      <motion.div 
-        className="grid grid-cols-1 md:grid-cols-4 gap-6"
+      <motion.section 
+        className="space-y-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ staggerChildren: 0.1 }}
       >
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-emerald-50 to-emerald-100">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-gray-700">Total Shipments</CardTitle>
-                <div className="p-3 bg-emerald-600 rounded-lg">
-                  <Truck className="w-5 h-5 text-white" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-emerald-900">{shipments.length}</div>
-              <p className="text-xs text-gray-600 mt-2">Created by you</p>
-            </CardContent>
-          </Card>
-        </motion.div>
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/50 rounded-full"></div>
+          <h2 className="text-lg font-semibold">Shipment Overview</h2>
+        </div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-blue-50 to-blue-100">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-gray-700">In Transit</CardTitle>
-                <div className="p-3 bg-blue-600 rounded-lg">
-                  <Package className="w-5 h-5 text-white" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-900">{shipments.filter(s => s.status === 'IN_TRANSIT').length}</div>
-              <p className="text-xs text-gray-600 mt-2">Currently moving</p>
-            </CardContent>
-          </Card>
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ staggerChildren: 0.1 }}
+        >
+          {[
+            { label: "Total Shipments", value: shipments.length, icon: Truck, color: "emerald" },
+            { label: "In Transit", value: shipments.filter(s => s.status === 'IN_TRANSIT').length, icon: Package, color: "blue" },
+            { label: "Delivered", value: shipments.filter(s => s.status === 'DELIVERED').length, icon: Users, color: "green" },
+            { label: "Avg Progress", value: shipments.length > 0 ? Math.round(shipments.reduce((acc, s) => acc + s.currentProgress, 0) / shipments.length) : 0, icon: Building, color: "purple" },
+          ].map((item, idx) => (
+            <motion.div key={idx} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}>
+              <Card className={`border border-border/50 bg-gradient-to-br from-${item.color}-50/50 to-${item.color}-100/30 dark:from-${item.color}-950/20 dark:to-${item.color}-900/10 hover:border-border hover:shadow-md transition-all`}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{item.label}</CardTitle>
+                    <div className={`p-2 bg-${item.color}-100 dark:bg-${item.color}-900/40 rounded-lg`}>
+                      <item.icon className={`w-5 h-5 text-${item.color}-600 dark:text-${item.color}-400`} />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{item.value}{item.label === "Avg Progress" ? "%" : ""}</div>
+                  <p className="text-xs text-muted-foreground mt-2">{item.label}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
         </motion.div>
+      </motion.section>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-green-50 to-green-100">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-gray-700">Delivered</CardTitle>
-                <div className="p-3 bg-green-600 rounded-lg">
-                  <Users className="w-5 h-5 text-white" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-900">{shipments.filter(s => s.status === 'DELIVERED').length}</div>
-              <p className="text-xs text-gray-600 mt-2">Successfully completed</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-purple-50 to-purple-100">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-gray-700">Avg Progress</CardTitle>
-                <div className="p-3 bg-purple-600 rounded-lg">
-                  <Building className="w-5 h-5 text-white" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-purple-900">
-                {shipments.length > 0 ? Math.round(shipments.reduce((acc, s) => acc + s.currentProgress, 0) / shipments.length) : 0}%
-              </div>
-              <p className="text-xs text-gray-600 mt-2">Your shipments</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </motion.div>
-
+      {/* Create Form Section */}
       {showCreateForm && (
-        <Card>
+        <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/50 rounded-full"></div>
+            <h2 className="text-lg font-semibold">Create New Shipment</h2>
+          </div>
 
-          <CardHeader>
-            <CardTitle>Create New Shipment</CardTitle>
-          </CardHeader>
+          <Card className="border border-border/50 bg-background/50 backdrop-blur-sm hover:border-border/75 transition-all rounded-xl">
+            <CardHeader className="border-b border-border/50 bg-gradient-to-r from-primary/10 to-primary/5">
+              <CardTitle>Shipment Details</CardTitle>
+            </CardHeader>
           <CardContent>
             <form onSubmit={handleCreateShipment} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -349,14 +328,14 @@ export default function CompanyOfficerDashboard() {
               transition={{ delay: idx * 0.1 }}
               className="cursor-pointer group"
             >
-              <Card className={`border-0 shadow-lg hover:shadow-xl transition-all h-full bg-gradient-to-br from-white to-gray-50 ${selectedShipment?.id === shipment.id ? 'ring-2 ring-emerald-500 ring-opacity-50' : 'hover:from-emerald-50'} hover:scale-[1.02] transform`}>
-                <CardHeader className="pb-3">
+              <Card className={`border border-border/50 hover:shadow-md transition-all h-full bg-gradient-to-br from-background to-secondary/30 hover:from-secondary/50 hover:to-secondary/20 ${selectedShipment?.id === shipment.id ? 'ring-2 ring-primary ring-opacity-50' : ''} hover:border-border/75`}>
+                <CardHeader className="pb-3 border-b border-border/50">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
-                      <CardTitle className="text-lg text-gray-900 group-hover:text-emerald-900">{shipment.trackingNumber}</CardTitle>
+                      <CardTitle className="text-lg">{shipment.trackingNumber}</CardTitle>
                       <CardDescription className="text-sm mt-1">{shipment.cargoType} - {shipment.cargoWeight}kg</CardDescription>
                     </div>
-                    <Badge className={`${getStatusColor(shipment.status)} border-0 capitalize`}>
+                    <Badge className={`${getStatusColor(shipment.status)} border`}>
                       {shipment.status.replace('_', ' ')}
                     </Badge>
                   </div>
@@ -365,31 +344,31 @@ export default function CompanyOfficerDashboard() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <p className="text-xs text-gray-600 uppercase tracking-wide">From</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">From</p>
                       <p className="font-semibold">{shipment.originName}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600 uppercase tracking-wide">To</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">To</p>
                       <p className="font-semibold">{shipment.destinationName}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600 uppercase tracking-wide">Customer</p>
-                      <p className="font-semibold text-emerald-900">{shipment.customerName}</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">Customer</p>
+                      <p className="font-semibold text-primary">{shipment.customerName}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600 uppercase tracking-wide">Receiver</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">Receiver</p>
                       <p className="font-semibold">{shipment.receiverName}</p>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-gray-600">Progress</span>
-                      <span className="font-bold text-emerald-600">{shipment.currentProgress}%</span>
+                      <span className="font-semibold text-muted-foreground">Progress</span>
+                      <span className="font-bold text-primary">{shipment.currentProgress}%</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                    <div className="w-full bg-border/50 rounded-full h-2 overflow-hidden">
                       <motion.div
-                        className="bg-gradient-to-r from-emerald-500 to-teal-600 h-2.5 rounded-full"
+                        className="bg-gradient-to-r from-primary to-primary/50 h-2 rounded-full"
                         initial={{ width: 0 }}
                         animate={{ width: `${shipment.currentProgress}%` }}
                         transition={{ duration: 0.8, ease: "easeOut" }}
@@ -424,8 +403,10 @@ export default function CompanyOfficerDashboard() {
               </Card>
             </motion.div>
           ))}
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+        </motion.section>
+      </div>
     </div>
   )
 }

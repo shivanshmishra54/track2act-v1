@@ -89,15 +89,15 @@ export default function DriverDashboard() {
   const getStatusColor = (status) => {
     switch (status) {
       case "DELIVERED":
-        return "bg-green-100 text-green-800"
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
       case "IN_TRANSIT":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200"
       case "PENDING":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200"
       case "DELAYED":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200"
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-muted text-muted-foreground"
     }
   }
 
@@ -212,90 +212,90 @@ export default function DriverDashboard() {
             animate={{ opacity: 1 }}
             transition={{ staggerChildren: 0.1 }}
           >
-          {shipments.map((shipment, idx) => (
-            <motion.div
-              key={shipment.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="cursor-pointer group"
-              onClick={() => setSelectedShipment(shipment)}
-            >
-              <Card className="border-0 shadow-lg hover:shadow-xl transition-all h-full bg-gradient-to-br from-white to-gray-50 hover:from-blue-50 hover:scale-[1.02] transform">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg text-gray-900 group-hover:text-blue-900">{shipment.trackingNumber}</CardTitle>
-                      <CardDescription className="text-sm mt-1">{shipment.cargoType}</CardDescription>
+            {shipments.map((shipment, idx) => (
+              <motion.div
+                key={shipment.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="cursor-pointer group"
+                onClick={() => setSelectedShipment(shipment)}
+              >
+                <Card className="border border-border/50 hover:shadow-md transition-all h-full bg-gradient-to-br from-background to-secondary/30 hover:from-secondary/50 hover:to-secondary/20 hover:border-border/75">
+                  <CardHeader className="pb-3 border-b border-border/50">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{shipment.trackingNumber}</CardTitle>
+                        <CardDescription className="text-sm mt-1">{shipment.cargoType}</CardDescription>
+                      </div>
+                      <Badge className={`${getStatusColor(shipment.status)} border`}>
+                        {shipment.status.replace('_', ' ')}
+                      </Badge>
                     </div>
-                    <Badge className={`${getStatusColor(shipment.status)} border-0 capitalize`}>
-                      {shipment.status.replace('_', ' ')}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="space-y-4">
-                  {/* Route */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                      <span className="text-sm text-gray-700 font-medium">{shipment.originName}</span>
+                  </CardHeader>
+                  
+                  <CardContent className="space-y-4">
+                    {/* Route */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                        <span className="text-sm font-medium">{shipment.originName}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Navigation className="w-4 h-4 text-muted-foreground flex-shrink-0 rotate-[-45deg]" />
+                        <div className="flex-1 h-1 bg-gradient-to-r from-primary to-primary/50 rounded-full"></div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                        <span className="text-sm font-medium">{shipment.destinationName}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Navigation className="w-4 h-4 text-gray-400 flex-shrink-0 rotate-[-45deg]" />
-                      <div className="flex-1 h-1 bg-gradient-to-r from-blue-400 to-green-600 rounded-full"></div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-green-600 flex-shrink-0" />
-                      <span className="text-sm text-gray-700 font-medium">{shipment.destinationName}</span>
-                    </div>
-                  </div>
 
-                  {/* Progress */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-gray-600">Progress</span>
-                      <span className="font-bold text-blue-600">{shipment.currentProgress}%</span>
+                    {/* Progress */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-muted-foreground">Progress</span>
+                        <span className="font-bold text-primary">{shipment.currentProgress}%</span>
+                      </div>
+                      <div className="w-full bg-border/50 rounded-full h-2 overflow-hidden">
+                        <motion.div
+                          className="bg-gradient-to-r from-primary to-primary/50 h-2 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${shipment.currentProgress}%` }}
+                          transition={{ duration: 0.8, ease: "easeOut" }}
+                        />
+                      </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                      <motion.div
-                        className="bg-gradient-to-r from-blue-500 to-green-600 h-2.5 rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${shipment.currentProgress}%` }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
-                      />
+
+                    {/* Receiver */}
+                    <div className="pt-2 border-t border-border/50 space-y-1">
+                      <p className="text-xs text-muted-foreground">Receiver</p>
+                      <p className="font-semibold text-sm">{shipment.receiverName}</p>
+                      <p className="text-xs text-muted-foreground">{shipment.receiverContact}</p>
                     </div>
-                  </div>
 
-                  {/* Receiver */}
-                  <div className="pt-2 border-t space-y-1">
-                    <p className="text-xs text-gray-600">Receiver</p>
-                    <p className="font-semibold text-sm">{shipment.receiverName}</p>
-                    <p className="text-xs text-gray-500">{shipment.receiverContact}</p>
-                  </div>
-
-                  {/* Action Button */}
-                  {selectedShipment?.id === shipment.id && (
-                    <motion.div 
-                      className="flex gap-2 pt-3" 
-                      initial={{ opacity: 0, y: 10 }} 
-                      animate={{ opacity: 1, y: 0 }}
-                    >
-                      <Button
-                        size="sm"
-                        variant={sharingLocation ? "destructive" : "default"}
-                        className="flex-1"
-                        onClick={(e) => { e.stopPropagation(); sharingLocation ? stopLiveLocation() : startLiveLocation(); }}
+                    {/* Action Button */}
+                    {selectedShipment?.id === shipment.id && (
+                      <motion.div 
+                        className="flex gap-2 pt-3" 
+                        initial={{ opacity: 0, y: 10 }} 
+                        animate={{ opacity: 1, y: 0 }}
                       >
-                        <Navigation className="w-4 h-4 mr-2" />
-                        {sharingLocation ? "Stop Live" : "Start Live Tracking"}
-                      </Button>
-                    </motion.div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                        <Button
+                          size="sm"
+                          variant={sharingLocation ? "destructive" : "default"}
+                          className="flex-1"
+                          onClick={(e) => { e.stopPropagation(); sharingLocation ? stopLiveLocation() : startLiveLocation(); }}
+                        >
+                          <Navigation className="w-4 h-4 mr-2" />
+                          {sharingLocation ? "Stop Live" : "Start Live Tracking"}
+                        </Button>
+                      </motion.div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </motion.div>
         )}
       </motion.section>
