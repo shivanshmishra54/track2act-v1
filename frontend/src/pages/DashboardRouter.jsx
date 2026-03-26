@@ -41,9 +41,5 @@ export default function DashboardRouter() {
     return <Navigate to="/login" replace />
   }
 
-  return (
-    <DashboardLayout>
-      <DashboardComponent />
-    </DashboardLayout>
-  )
+  return <DashboardComponent />
 }

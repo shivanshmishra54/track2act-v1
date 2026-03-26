@@ -36,4 +36,15 @@ public class ShipmentDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<TrackingUpdateDTO> trackingHistory;
+    
+    private String statusColor;
+    
+    public String getStatusColor() {
+        return switch (this.status) {
+            case "PENDING" -> "amber";
+            case "IN_TRANSIT" -> "blue";
+            case "DELIVERED" -> "green";
+            default -> "gray";
+        };
+    }
 }

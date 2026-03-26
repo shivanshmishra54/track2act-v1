@@ -21,6 +21,7 @@ C:\shiva\HTML\t2\backend\src\main\java\com\track2act\controller\LocationControll
 C:\shiva\HTML\t2\backend\src\main\java\com\track2act\entity\Shipment.java
 C:\shiva\HTML\t2\backend\src\main\java\com\track2act\exception\GlobalExceptionHandler.java
 C:\shiva\HTML\t2\backend\src\main\java\com\track2act\dto\request\LocationUpdateRequest.java
+C:\shiva\HTML\t2\backend\src\main\java\com\track2act\dto\response\DashboardStatsDTO.java
 C:\shiva\HTML\t2\backend\src\main\java\com\track2act\security\JwtUtils.java
 C:\shiva\HTML\t2\backend\src\main\java\com\track2act\entity\User.java
 C:\shiva\HTML\t2\backend\src\main\java\com\track2act\service\ShipmentService.java

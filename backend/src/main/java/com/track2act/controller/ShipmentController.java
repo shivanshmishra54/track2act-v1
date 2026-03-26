@@ -5,6 +5,7 @@ import com.track2act.dto.request.UpdateShipmentRequest;
 import com.track2act.dto.request.LocationUpdateRequest;
 import com.track2act.dto.response.ApiResponse;
 import com.track2act.dto.response.ShipmentDTO;
+import com.track2act.dto.response.DashboardStatsDTO;
 import com.track2act.dto.response.TrackingUpdateDTO;
 import com.track2act.service.ShipmentService;
 import jakarta.validation.Valid;
@@ -83,6 +84,13 @@ public class ShipmentController {
     public ResponseEntity<ApiResponse<List<TrackingUpdateDTO>>> getTrackingHistory(@PathVariable UUID id) {
         List<TrackingUpdateDTO> history = shipmentService.getTrackingHistory(id);
         return ResponseEntity.ok(ApiResponse.success("Tracking history fetched", history));
+    }
+
+@PreAuthorize("hasAnyRole('ADMIN', 'COMPANY_OFFICER', 'ANALYST')")
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<DashboardStatsDTO>> getDashboardStats() {
+        DashboardStatsDTO stats = shipmentService.getDashboardStats();
+        return ResponseEntity.ok(ApiResponse.success("Stats fetched", stats));
     }
 }
 

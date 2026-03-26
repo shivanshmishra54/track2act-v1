@@ -1,11 +1,16 @@
 import { useState, useEffect } from "react"
+import { Skeleton } from "../../components/ui/skeleton"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
+import { formatDateTime } from "../../lib/format.js"
+
 import { Button } from "../../components/ui/button"
 import { Badge } from "../../components/ui/badge"
 import { Input } from "../../components/ui/input"
 import { useAuth, API } from "../../context/AuthContext"
-import { Users, Truck, Building2, Eye, Shield, LogOut, TrendingUp, CheckCircle2, AlertCircle, Search, ChevronRight, Lock, RefreshCw } from "lucide-react"
+import { shipmentService } from "../../services/shipmentService.js"
+import { Users, Truck, Building2, Eye, Shield, LogOut, TrendingUp, CheckCircle2, AlertCircle, Search, ChevronRight, Lock, RefreshCw, Package } from "lucide-react"
 import { motion } from "framer-motion"
+import { StatsCards } from "../../components/dashboard/stats-cards.jsx"
 
 const ROLES = ["ADMIN", "DRIVER", "COMPANY_OFFICER", "PORT_MANAGER", "ANALYST", "CUSTOMER"]
 
@@ -13,6 +18,13 @@ export default function AdminDashboard() {
   const { user } = useAuth()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [shipmentStats, setShipmentStats] = useState({
+    totalShipments: 0,
+    activeShipments: 0,
+    deliveredShipments: 0,
+    delayedShipments: 0
+  })
+  const [statsLoading, setStatsLoading] = useState(true)
   const [selectedUser, setSelectedUser] = useState(null)
   const [assigningRole, setAssigningRole] = useState(null)
   const [newRole, setNewRole] = useState("")
@@ -20,6 +32,21 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchAllUsers()
+  }, [])
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setStatsLoading(true)
+      try {
+        const data = await shipmentService.getDashboardStats()
+        setShipmentStats(data)
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error)
+      } finally {
+        setStatsLoading(false)
+      }
+    }
+    fetchStats()
   }, [])
 
   const fetchAllUsers = async () => {
@@ -164,82 +191,10 @@ export default function AdminDashboard() {
       >
         <div className="flex items-center gap-2">
           <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/50 rounded-full"></div>
-          <h2 className="text-lg font-semibold">Platform Metrics</h2>
+          <h2 className="text-lg font-semibold">Shipment Metrics</h2>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Total Users Card */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="border border-border/50 bg-gradient-to-br from-blue-50/50 to-blue-100/30 dark:from-blue-950/20 dark:to-blue-900/10 hover:border-border hover:shadow-md transition-all">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Total Users</CardTitle>
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
-                    <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stats.total}</div>
-                <p className="text-xs text-muted-foreground mt-2">Platform wide</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Drivers Card */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <Card className="border border-border/50 bg-gradient-to-br from-cyan-50/50 to-cyan-100/30 dark:from-cyan-950/20 dark:to-cyan-900/10 hover:border-border hover:shadow-md transition-all">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Drivers</CardTitle>
-                  <div className="p-2 bg-cyan-100 dark:bg-cyan-900/40 rounded-lg">
-                    <Truck className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stats.drivers}</div>
-                <p className="text-xs text-muted-foreground mt-2">Active drivers</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Officers Card */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <Card className="border border-border/50 bg-gradient-to-br from-purple-50/50 to-purple-100/30 dark:from-purple-950/20 dark:to-purple-900/10 hover:border-border hover:shadow-md transition-all">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Officers</CardTitle>
-                  <div className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-lg">
-                    <Building2 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stats.officers}</div>
-                <p className="text-xs text-muted-foreground mt-2">Management staff</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Active Users Card */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <Card className="border border-border/50 bg-gradient-to-br from-emerald-50/50 to-emerald-100/30 dark:from-emerald-950/20 dark:to-emerald-900/10 hover:border-border hover:shadow-md transition-all">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Active Users</CardTitle>
-                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/40 rounded-lg">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stats.active}</div>
-                <p className="text-xs text-muted-foreground mt-2">Currently active</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
+        <StatsCards stats={shipmentStats} isLoading={statsLoading} />
       </motion.section>
 
       {/* User Management Section */}
@@ -276,14 +231,34 @@ export default function AdminDashboard() {
             </div>
 
             {/* Users List */}
-            {loading ? (
-              <motion.div className="text-center py-12" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <div className="inline-block">
-                  <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-primary/30 mb-4"></div>
-                  <p className="text-muted-foreground">Loading users...</p>
+{loading ? (
+                <div className="space-y-4 p-8">
+                  {/* Stats Skeletons */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {Array(4).fill(0).map((_, i) => (
+                      <Skeleton key={i} className="h-24 w-full" />
+                    ))}
+                  </div>
+                  {/* Users List Skeletons */}
+                  <div className="space-y-3">
+                    {Array(5).fill(0).map((_, i) => (
+                      <div key={i} className="p-4 border rounded-lg space-y-3">
+                        <div className="flex items-center gap-4">
+                          <Skeleton className="h-12 w-12 rounded-full" />
+                          <div className="space-y-2 flex-1">
+                            <Skeleton className="h-5 w-32" />
+                            <Skeleton className="h-4 w-48" />
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Skeleton className="h-8 w-24" />
+                          <Skeleton className="h-8 w-20" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </motion.div>
-            ) : filteredUsers.length === 0 ? (
+              ) : filteredUsers.length === 0 ? (
               <motion.div className="text-center py-12" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <AlertCircle className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
                 <p className="text-muted-foreground text-base font-medium">No users found</p>

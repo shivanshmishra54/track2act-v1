@@ -22,4 +22,8 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
     
     @Query("SELECT s FROM Shipment s WHERE s.trackingNumber = :trackingNumber")
     Optional<Shipment> findByTrackingNumber(@Param("trackingNumber") String trackingNumber);
+
+    long count();
+
+    long countByStatus(Status status);
 }

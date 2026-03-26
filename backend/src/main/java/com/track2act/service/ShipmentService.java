@@ -251,4 +251,13 @@ public class ShipmentService {
     public List<com.track2act.dto.response.LocationDTO> getAllLocations() {
         return locationRepository.findAll().stream().map(l -> new com.track2act.dto.response.LocationDTO(l.getId(), l.getName(), com.track2act.dto.response.LocationDTO.LocationType.valueOf(l.getType().name()), l.getLatitude(), l.getLongitude())).collect(Collectors.toList());
     }
+
+    public com.track2act.dto.response.DashboardStatsDTO getDashboardStats() {
+        return com.track2act.dto.response.DashboardStatsDTO.builder()
+                .totalShipments(shipmentRepository.count())
+                .activeShipments(shipmentRepository.countByStatus(Shipment.Status.IN_TRANSIT))
+                .deliveredShipments(shipmentRepository.countByStatus(Shipment.Status.DELIVERED))
+                .delayedShipments(shipmentRepository.countByStatus(Shipment.Status.DELAYED))
+                .build();
+    }
 }
