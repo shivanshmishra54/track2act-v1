@@ -102,138 +102,116 @@ export default function DriverDashboard() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-              Driver Dashboard
-            </h1>
-            <p className="text-gray-600 mt-2">Manage your assigned shipments and share your live location</p>
+      <motion.div 
+        className="border-b border-border/50 bg-background/95 backdrop-blur-sm sticky top-0 z-10"
+        initial={{ opacity: 0, y: -20 }} 
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <div className="p-4 lg:p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Driver Dashboard</h1>
+              <p className="text-sm text-muted-foreground mt-1">Manage assigned shipments and live tracking</p>
+            </div>
+            <motion.div whileHover={{ scale: 1.05 }}>
+              <Button onClick={fetchAssignedShipments} variant="outline" className="gap-2">
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </Button>
+            </motion.div>
           </div>
-          <motion.div whileHover={{ scale: 1.05 }}>
-            <Button onClick={fetchAssignedShipments} variant="outline" className="gap-2">
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </Button>
-          </motion.div>
         </div>
       </motion.div>
 
+      {/* Main Content */}
+      <div className="p-4 lg:p-6 space-y-6">
+
+      {/* Live Location Alert */}
       {currentLocation && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <Card className="border-2 border-green-500 bg-green-50 shadow-lg">
+          <Card className="border border-success/30 bg-success/5 backdrop-blur-sm hover:border-success/50 transition-all">
             <CardContent className="pt-6">
-              <div className="flex items-center gap-2 text-green-800 font-semibold">
+              <div className="flex items-center gap-3 text-success font-semibold">
                 <Navigation className="w-5 h-5 animate-pulse" />
-                <span>LIVE: {currentLocation.latitude.toFixed(4)}, {currentLocation.longitude.toFixed(4)}</span>
+                <span>LIVE TRACKING ACTIVE: {currentLocation.latitude.toFixed(4)}, {currentLocation.longitude.toFixed(4)}</span>
               </div>
             </CardContent>
           </Card>
         </motion.div>
       )}
 
-      {/* Stats Grid */}
-      <motion.div 
-        className="grid grid-cols-1 md:grid-cols-4 gap-6"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ staggerChildren: 0.1 }}
-      >
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-blue-50 to-blue-100">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-gray-700">Active Shipments</CardTitle>
-                <div className="p-3 bg-blue-600 rounded-lg">
-                  <Truck className="w-5 h-5 text-white" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-900">{shipments.filter(s => s.status === "IN_TRANSIT").length}</div>
-              <p className="text-xs text-gray-600 mt-2">Currently transporting</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-yellow-50 to-yellow-100">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-gray-700">Pending Pickup</CardTitle>
-                <div className="p-3 bg-yellow-600 rounded-lg">
-                  <Package className="w-5 h-5 text-white" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-yellow-900">{shipments.filter(s => s.status === "PENDING").length}</div>
-              <p className="text-xs text-gray-600 mt-2">Awaiting collection</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-green-50 to-green-100">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-gray-700">Delivered Today</CardTitle>
-                <div className="p-3 bg-green-600 rounded-lg">
-                  <CheckCircle2 className="w-5 h-5 text-white" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-900">{shipments.filter(s => s.status === "DELIVERED").length}</div>
-              <p className="text-xs text-gray-600 mt-2">Successful deliveries</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-emerald-50 to-emerald-100">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-gray-700">Live Tracking</CardTitle>
-                <div className="p-3 bg-emerald-600 rounded-lg">
-                  <Navigation className="w-5 h-5 text-white" />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-emerald-900">{sharingLocation ? "ON" : "OFF"}</div>
-              <p className="text-xs text-gray-600 mt-2">{sharingLocation ? "Location shared" : "Start sharing"}</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </motion.div>
-
-      {loading ? (
-        <motion.div className="text-center py-12" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <div className="inline-block">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-            <p className="text-gray-600">Loading your shipments...</p>
-          </div>
-        </motion.div>
-      ) : shipments.length === 0 ? (
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-          <Card className="border-0 shadow-lg">
-            <CardContent className="pt-12 pb-12 text-center">
-              <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg font-medium">No shipments assigned</p>
-              <p className="text-gray-400 text-sm mt-2">Check back later for new assignments</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : (
+      {/* Stats Section */}
+      <motion.section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/50 rounded-full"></div>
+          <h2 className="text-lg font-semibold">Shipment Metrics</h2>
+        </div>
+        
         <motion.div 
-          className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ staggerChildren: 0.1 }}
         >
+          {[
+            { label: "Active Shipments", value: shipments.filter(s => s.status === "IN_TRANSIT").length, icon: Truck, color: "blue" },
+            { label: "Pending Pickup", value: shipments.filter(s => s.status === "PENDING").length, icon: Package, color: "yellow" },
+            { label: "Delivered Today", value: shipments.filter(s => s.status === "DELIVERED").length, icon: CheckCircle2, color: "green" },
+            { label: "Live Tracking", value: sharingLocation ? "ON" : "OFF", icon: Navigation, color: "emerald" },
+          ].map((item, idx) => (
+            <motion.div key={idx} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}>
+              <Card className={`border border-border/50 bg-gradient-to-br from-${item.color}-50/50 to-${item.color}-100/30 dark:from-${item.color}-950/20 dark:to-${item.color}-900/10 hover:border-border hover:shadow-md transition-all`}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{item.label}</CardTitle>
+                    <div className={`p-2 bg-${item.color}-100 dark:bg-${item.color}-900/40 rounded-lg`}>
+                      <item.icon className={`w-5 h-5 text-${item.color}-600 dark:text-${item.color}-400`} />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{item.value}</div>
+                  <p className="text-xs text-muted-foreground mt-2">{item.label}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+      </motion.section>
+
+      {/* Shipments Section */}
+      <motion.section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/50 rounded-full"></div>
+          <h2 className="text-lg font-semibold">Assigned Shipments</h2>
+        </div>
+
+        {loading ? (
+          <motion.div className="text-center py-12" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <div className="inline-block">
+              <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-primary/30 mb-4"></div>
+              <p className="text-muted-foreground">Loading your shipments...</p>
+            </div>
+          </motion.div>
+        ) : shipments.length === 0 ? (
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+            <Card className="border border-border/50 bg-background/50 backdrop-blur-sm">
+              <CardContent className="pt-12 pb-12 text-center">
+                <Package className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+                <p className="text-muted-foreground text-lg font-medium">No shipments assigned</p>
+                <p className="text-muted-foreground/70 text-sm mt-2">Check back later for new assignments</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ) : (
+          <motion.div 
+            className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ staggerChildren: 0.1 }}
+          >
           {shipments.map((shipment, idx) => (
             <motion.div
               key={shipment.id}
@@ -318,8 +296,9 @@ export default function DriverDashboard() {
               </Card>
             </motion.div>
           ))}
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </motion.section>
     </div>
   )
 }
