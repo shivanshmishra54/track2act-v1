@@ -59,50 +59,54 @@ export default function TrackShipment() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 pt-20">
+    <div className="min-h-screen bg-background pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          className="mb-12 border-b border-border/50 pb-8 sticky top-20 bg-background/80 backdrop-blur-sm -mx-4 px-4 sm:px-6 lg:px-8 -mt-20 pt-20"
+        >
           <div className="flex items-center gap-3 mb-4">
-            <Package className="w-10 h-10 text-blue-600" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-900 bg-clip-text text-transparent">
-              Track Your Shipment
-            </h1>
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Package className="w-6 h-6 text-primary" />
+            </div>
+            <h1 className="text-3xl font-bold">Track Your Shipment</h1>
           </div>
-          <p className="text-gray-600 text-lg">Enter your tracking number to get real-time updates on your package</p>
+          <p className="text-muted-foreground text-base">Enter your tracking number for real-time delivery updates</p>
         </motion.div>
 
         {/* Search Card */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <Card className="border-0 shadow-xl bg-white rounded-2xl mb-8">
-            <CardHeader className="pb-0">
+          <Card className="border border-border/50 bg-background/50 backdrop-blur-sm hover:border-border/75 transition-all rounded-xl mb-8">
+            <CardHeader className="pb-6 border-b border-border/50 bg-gradient-to-r from-primary/5 to-primary/0">
               <CardTitle>Find Your Shipment</CardTitle>
-              <CardDescription>Use your tracking number to monitor your delivery</CardDescription>
+              <CardDescription>Enter your tracking number for real-time updates</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <form onSubmit={handleTrack} className="space-y-4">
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
                     type="text"
                     placeholder="Enter tracking number (e.g., TRK123456789)"
                     value={trackingNumber}
                     onChange={(e) => setTrackingNumber(e.target.value)}
-                    className="pl-12 h-12 text-lg rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    className="pl-12 h-11 text-base rounded-lg border-border/50 bg-secondary/50 focus:border-primary/50 focus:ring-primary/20 transition-colors"
                   />
                 </div>
                 <Button 
                   type="submit" 
                   disabled={loading}
-                  className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl"
+                  className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-lg"
                 >
                   {loading ? "Tracking..." : "Track Shipment"}
                 </Button>
               </form>
               {error && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-red-700">{error}</p>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 p-4 bg-destructive/10 border border-destructive/30 rounded-lg flex gap-3">
+                  <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                  <p className="text-destructive">{error}</p>
                 </motion.div>
               )}
             </CardContent>
@@ -112,12 +116,12 @@ export default function TrackShipment() {
         {/* Shipment Details */}
         {shipment && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <Card className="border-0 shadow-xl rounded-2xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-800 text-white pb-8">
+            <Card className="border border-border/50 bg-background/50 backdrop-blur-sm hover:border-border/75 transition-all rounded-xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 border-b border-border/50 pb-6">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <CardTitle className="text-white text-2xl">{shipment.trackingNumber}</CardTitle>
-                    <CardDescription className="text-blue-100 mt-2">{shipment.cargoType}</CardDescription>
+                    <CardTitle className="text-2xl">{shipment.trackingNumber}</CardTitle>
+                    <CardDescription className="mt-2 text-muted-foreground">{shipment.cargoType}</CardDescription>
                   </div>
                   <Badge className={`${getStatusColor(shipment.status)} border`}>
                     {shipment.status.replace('_', ' ')}
@@ -130,53 +134,53 @@ export default function TrackShipment() {
                 <div className="space-y-6">
                   <h3 className="text-lg font-bold text-gray-900">Route Information</h3>
                   
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid md:grid-cols-2 gap-4">
                     {/* From */}
-                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="bg-blue-50 rounded-xl p-6 border border-blue-200">
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="bg-blue-50/50 dark:bg-blue-950/20 rounded-lg p-5 border border-blue-200/50 dark:border-blue-800/30">
                       <div className="flex items-center gap-2 mb-2">
-                        <MapPin className="w-5 h-5 text-blue-600" />
-                        <p className="text-sm font-semibold text-gray-600 uppercase">From</p>
+                        <MapPin className="w-4 h-4 text-primary" />
+                        <p className="text-xs font-semibold text-muted-foreground uppercase">From</p>
                       </div>
-                      <p className="text-xl font-bold text-gray-900">{shipment.originName}</p>
+                      <p className="text-lg font-bold">{shipment.originName}</p>
                     </motion.div>
 
                     {/* To */}
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-green-50 rounded-xl p-6 border border-green-200">
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-green-50/50 dark:bg-green-950/20 rounded-lg p-5 border border-green-200/50 dark:border-green-800/30">
                       <div className="flex items-center gap-2 mb-2">
-                        <MapPin className="w-5 h-5 text-green-600" />
-                        <p className="text-sm font-semibold text-gray-600 uppercase">To</p>
+                        <MapPin className="w-4 h-4 text-primary" />
+                        <p className="text-xs font-semibold text-muted-foreground uppercase">To</p>
                       </div>
-                      <p className="text-xl font-bold text-gray-900">{shipment.destinationName}</p>
+                      <p className="text-lg font-bold">{shipment.destinationName}</p>
                     </motion.div>
                   </div>
 
                   {/* Route Visual */}
-                  <div className="bg-gray-50 rounded-xl p-6 space-y-4">
+                  <div className="bg-secondary/30 rounded-lg p-5 space-y-4">
                     <div className="flex items-center gap-4">
-                      <div className="flex-1 space-y-2">
-                        <div className="text-sm font-semibold text-gray-600">DEPARTURE</div>
-                        <div className="text-gray-900 font-bold">{shipment.originName}</div>
+                      <div className="flex-1 space-y-1">
+                        <div className="text-xs font-semibold text-muted-foreground uppercase">Departure</div>
+                        <div className="font-semibold text-foreground">{shipment.originName}</div>
                       </div>
                       <div className="flex flex-col items-center">
-                        <Navigation className="w-6 h-6 text-blue-600 rotate-45" />
+                        <Navigation className="w-5 h-5 text-primary rotate-45" />
                       </div>
-                      <div className="flex-1 space-y-2 text-right">
-                        <div className="text-sm font-semibold text-gray-600">DELIVERY</div>
-                        <div className="text-gray-900 font-bold">{shipment.destinationName}</div>
+                      <div className="flex-1 space-y-1 text-right">
+                        <div className="text-xs font-semibold text-muted-foreground uppercase">Delivery</div>
+                        <div className="font-semibold text-foreground">{shipment.destinationName}</div>
                       </div>
                     </div>
                     
-                    <div className="w-full bg-gray-300 rounded-full h-1 relative overflow-hidden">
+                    <div className="w-full bg-border/50 rounded-full h-2 relative overflow-hidden">
                       <motion.div
-                        className="bg-gradient-to-r from-blue-500 to-green-500 h-full rounded-full"
+                        className="bg-gradient-to-r from-primary to-primary/50 h-full rounded-full"
                         initial={{ width: 0 }}
                         animate={{ width: `${shipment.currentProgress}%` }}
                         transition={{ duration: 1, ease: "easeOut" }}
                       />
                     </div>
-                    <div className="flex justify-between text-sm text-gray-600 font-medium">
+                    <div className="flex justify-between text-sm font-semibold text-muted-foreground">
                       <span>Start</span>
-                      <span className="font-bold text-blue-600">{shipment.currentProgress}%</span>
+                      <span className="text-primary">{shipment.currentProgress}%</span>
                       <span>Delivered</span>
                     </div>
                   </div>
@@ -197,27 +201,27 @@ export default function TrackShipment() {
 
                 {/* Tracking History */}
                 {shipment.trackingHistory && shipment.trackingHistory.length > 0 && (
-                  <div className="border-t pt-8">
-                    <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                      <Truck className="w-5 h-5 text-blue-600" />
+                  <div className="border-t border-border/50 pt-8">
+                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+                      <Truck className="w-5 h-5 text-primary" />
                       Tracking History
                     </h3>
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
                       {shipment.trackingHistory.map((update, idx) => (
                         <motion.div
                           key={idx}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: idx * 0.05 }}
-                          className="border-l-4 border-blue-500 bg-gradient-to-r from-blue-50 to-transparent p-4 rounded-r-lg"
+                          className="border-l-4 border-primary bg-gradient-to-r from-primary/5 to-transparent p-4 rounded-r-lg"
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <p className="font-semibold text-gray-900">📍 {update.latitude.toFixed(4)}, {update.longitude.toFixed(4)}</p>
-                              <p className="text-sm text-gray-600 mt-1">{new Date(update.timestamp).toLocaleString()}</p>
-                              {update.statusNote && <p className="text-sm text-gray-700 mt-2 bg-white rounded px-3 py-1 border border-gray-200">💬 {update.statusNote}</p>}
+                              <p className="font-semibold">📍 {update.latitude.toFixed(4)}, {update.longitude.toFixed(4)}</p>
+                              <p className="text-sm text-muted-foreground mt-1">{new Date(update.timestamp).toLocaleString()}</p>
+                              {update.statusNote && <p className="text-sm mt-2 bg-background rounded px-3 py-1 border border-border/50">💬 {update.statusNote}</p>}
                             </div>
-                            <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
+                            <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
                           </div>
                         </motion.div>
                       ))}
@@ -235,9 +239,9 @@ export default function TrackShipment() {
 
 function DetailBox({ label, value }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-gray-50 rounded-lg p-4">
-      <p className="text-xs font-semibold text-gray-600 uppercase mb-1">{label}</p>
-      <p className="text-lg font-bold text-gray-900">{value}</p>
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-secondary/30 rounded-lg p-4 border border-border/50">
+      <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">{label}</p>
+      <p className="text-base font-semibold text-foreground">{value}</p>
     </motion.div>
   )
 }

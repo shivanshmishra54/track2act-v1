@@ -53,37 +53,41 @@ export default function Support() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20">
+    <div className="min-h-screen bg-background pt-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          className="mb-12 border-b border-border/50 pb-8 sticky top-20 bg-background/80 backdrop-blur-sm -mx-4 px-4 sm:px-6 lg:px-8 -mt-20 pt-20"
+        >
           <div className="flex items-center gap-3 mb-4">
-            <MessageSquare className="w-10 h-10 text-blue-600" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Support & Reporting
-            </h1>
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <MessageSquare className="w-6 h-6 text-primary" />
+            </div>
+            <h1 className="text-3xl font-bold">Support & Reporting</h1>
           </div>
-          <p className="text-gray-600 text-lg">We're here to help. Report issues or get support for your shipments</p>
+          <p className="text-muted-foreground text-base">We&apos;re here to help. Report issues or get support for your shipments</p>
         </motion.div>
 
         {/* Tabs */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex gap-4 mb-8">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex gap-3 mb-8">
           <button
             onClick={() => setActiveTab("report")}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+            className={`px-6 py-3 rounded-lg font-semibold transition-all border ${
               activeTab === "report"
-                ? "bg-blue-600 text-white shadow-lg"
-                : "bg-white text-gray-700 border border-gray-200 hover:border-blue-300"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-background text-muted-foreground border-border/50 hover:border-border"
             }`}
           >
             Report Issue
           </button>
           <button
             onClick={() => setActiveTab("faq")}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+            className={`px-6 py-3 rounded-lg font-semibold transition-all border ${
               activeTab === "faq"
-                ? "bg-blue-600 text-white shadow-lg"
-                : "bg-white text-gray-700 border border-gray-200 hover:border-blue-300"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-background text-muted-foreground border-border/50 hover:border-border"
             }`}
           >
             FAQ
@@ -93,10 +97,10 @@ export default function Support() {
         {/* Report Issue Tab */}
         {activeTab === "report" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-            <Card className="border-0 shadow-xl rounded-2xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-                <CardTitle className="text-white text-2xl">Create a Support Ticket</CardTitle>
-                <CardDescription className="text-blue-100">Let us know what's wrong and we'll help fix it</CardDescription>
+            <Card className="border border-border/50 bg-background/50 backdrop-blur-sm hover:border-border/75 transition-all rounded-xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 border-b border-border/50">
+                <CardTitle className="text-xl">Create a Support Ticket</CardTitle>
+                <CardDescription>Let us know what&apos;s wrong and we&apos;ll help fix it</CardDescription>
               </CardHeader>
 
               <CardContent className="pt-8">
