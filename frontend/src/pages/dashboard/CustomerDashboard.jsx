@@ -273,10 +273,8 @@ export default function CustomerDashboard() {
             </CardContent>
           </Card>
         </motion.div>
-            )}
-          </Card>
-        </motion.div>
-      )}
+        )}
+      </motion.section>
       </div>
     </div>
   )

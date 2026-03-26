@@ -4,7 +4,7 @@ import { Button } from "../../components/ui/button"
 import { Badge } from "../../components/ui/badge"
 import { Input } from "../../components/ui/input"
 import { useAuth, API } from "../../context/AuthContext"
-import { Users, Truck, Building2, Eye, Shield, LogOut, TrendingUp, CheckCircle2, AlertCircle, Search, ChevronRight, Lock } from "lucide-react"
+import { Users, Truck, Building2, Eye, Shield, LogOut, TrendingUp, CheckCircle2, AlertCircle, Search, ChevronRight, Lock, RefreshCw } from "lucide-react"
 import { motion } from "framer-motion"
 
 const ROLES = ["ADMIN", "DRIVER", "COMPANY_OFFICER", "PORT_MANAGER", "ANALYST", "CUSTOMER"]
@@ -407,6 +407,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </motion.section>
+      </div>
     </div>
   )
 }
