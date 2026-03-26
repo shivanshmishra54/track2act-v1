@@ -36,62 +36,76 @@ export default function CustomerDashboard() {
   const getStatusColor = (status) => {
     switch (status) {
       case "DELIVERED":
-        return "bg-green-100 text-green-800"
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
       case "IN_TRANSIT":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200"
       case "PENDING":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200"
       case "DELAYED":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200"
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-muted text-muted-foreground"
     }
   }
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-              Track Your Shipments
-            </h1>
-            <p className="text-gray-600 mt-2">Monitor real-time location and status of your parcels</p>
+      <motion.div 
+        className="border-b border-border/50 bg-background/95 backdrop-blur-sm sticky top-0 z-10"
+        initial={{ opacity: 0, y: -20 }} 
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <div className="p-4 lg:p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Track Your Shipments</h1>
+              <p className="text-sm text-muted-foreground mt-1">Real-time tracking and delivery updates</p>
+            </div>
+            <motion.div whileHover={{ scale: 1.05 }}>
+              <Button onClick={fetchShipments} variant="outline" className="gap-2">
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </Button>
+            </motion.div>
           </div>
-          <motion.div whileHover={{ scale: 1.05 }}>
-            <Button onClick={fetchShipments} variant="outline" className="gap-2">
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </Button>
-          </motion.div>
         </div>
       </motion.div>
 
-      {loading ? (
-        <motion.div className="text-center py-12" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <div className="inline-block">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-            <p className="text-gray-600">Loading your shipments...</p>
-          </div>
-        </motion.div>
-      ) : shipments.length === 0 ? (
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-          <Card className="border-0 shadow-lg">
-            <CardContent className="pt-12 pb-12 text-center">
-              <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">No active shipments found</p>
-              <p className="text-gray-400 text-sm mt-2">Your tracked parcels will appear here</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : (
-        <motion.div 
-          className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ staggerChildren: 0.1 }}
-        >
+      {/* Main Content */}
+      <div className="p-4 lg:p-6 space-y-6">
+
+      {/* Shipments Section */}
+      <motion.section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/50 rounded-full"></div>
+          <h2 className="text-lg font-semibold">Active Shipments</h2>
+        </div>
+
+        {loading ? (
+          <motion.div className="text-center py-12" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <div className="inline-block">
+              <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-primary/30 mb-4"></div>
+              <p className="text-muted-foreground">Loading your shipments...</p>
+            </div>
+          </motion.div>
+        ) : shipments.length === 0 ? (
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+            <Card className="border border-border/50 bg-background/50 backdrop-blur-sm">
+              <CardContent className="pt-12 pb-12 text-center">
+                <Package className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+                <p className="text-muted-foreground text-lg font-medium">No active shipments found</p>
+                <p className="text-muted-foreground/70 text-sm mt-2">Your tracked parcels will appear here</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ) : (
+          <motion.div 
+            className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ staggerChildren: 0.1 }}
+          >
           {shipments.map((shipment, idx) => (
             <motion.div
               key={shipment.id}
@@ -101,7 +115,7 @@ export default function CustomerDashboard() {
               className="cursor-pointer group"
               onClick={() => setSelectedShipment(shipment)}
             >
-              <Card className="border-0 shadow-lg hover:shadow-xl transition-all h-full bg-gradient-to-br from-white to-gray-50 hover:scale-105 transform">
+              <Card className="border border-border/50 hover:shadow-md transition-all h-full bg-gradient-to-br from-background to-secondary/30 hover:from-secondary/50 hover:to-secondary/20 hover:border-border/75">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
@@ -164,22 +178,29 @@ export default function CustomerDashboard() {
               </Card>
             </motion.div>
           ))}
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </motion.section>
 
+      {/* Tracking Details Modal */}
       {selectedShipment && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-blue-50">
-            <CardHeader className="border-b bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-t-lg">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/50 rounded-full"></div>
+            <h2 className="text-lg font-semibold">Tracking Details</h2>
+          </div>
+
+          <Card className="border border-border/50 bg-background/50 backdrop-blur-sm hover:border-border/75 transition-all">
+            <CardHeader className="border-b border-border/50 bg-gradient-to-r from-primary/10 to-primary/5">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-white text-2xl">Tracking Details</CardTitle>
-                  <CardDescription className="text-blue-100 mt-1">{selectedShipment.trackingNumber}</CardDescription>
+                  <CardTitle className="text-xl">Shipment Tracking Details</CardTitle>
+                  <CardDescription className="mt-1">{selectedShipment.trackingNumber}</CardDescription>
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   onClick={() => setSelectedShipment(null)}
-                  className="text-white hover:bg-white/20 rounded-full p-2"
+                  className="text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full p-2 transition-colors"
                 >
                   ✕
                 </motion.button>
@@ -189,26 +210,26 @@ export default function CustomerDashboard() {
             <CardContent className="pt-8 space-y-6">
               {/* Shipment Details Grid */}
               <motion.div 
-                className="grid grid-cols-2 md:grid-cols-4 gap-4"
+                className="grid grid-cols-2 md:grid-cols-4 gap-3"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ staggerChildren: 0.1 }}
               >
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                  <p className="text-xs font-semibold text-gray-600 uppercase">From</p>
-                  <p className="font-bold text-gray-900 mt-1">{selectedShipment.originName}</p>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-blue-50/50 dark:bg-blue-950/20 rounded-lg p-4 border border-blue-200/50 dark:border-blue-800/30">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">From</p>
+                  <p className="font-semibold text-foreground mt-1 line-clamp-2">{selectedShipment.originName}</p>
                 </motion.div>
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-green-50 rounded-lg p-4 border border-green-200">
-                  <p className="text-xs font-semibold text-gray-600 uppercase">To</p>
-                  <p className="font-bold text-gray-900 mt-1">{selectedShipment.destinationName}</p>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-green-50/50 dark:bg-green-950/20 rounded-lg p-4 border border-green-200/50 dark:border-green-800/30">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">To</p>
+                  <p className="font-semibold text-foreground mt-1 line-clamp-2">{selectedShipment.destinationName}</p>
                 </motion.div>
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Receiver</p>
-                  <p className="font-bold text-gray-900 mt-1">{selectedShipment.receiverName}</p>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-purple-50/50 dark:bg-purple-950/20 rounded-lg p-4 border border-purple-200/50 dark:border-purple-800/30">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Receiver</p>
+                  <p className="font-semibold text-foreground mt-1 line-clamp-2">{selectedShipment.receiverName}</p>
                 </motion.div>
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-orange-50 rounded-lg p-4 border border-orange-200">
-                  <p className="text-xs font-semibold text-gray-600 uppercase">Contact</p>
-                  <p className="font-bold text-gray-900 mt-1">{selectedShipment.receiverContact}</p>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-orange-50/50 dark:bg-orange-950/20 rounded-lg p-4 border border-orange-200/50 dark:border-orange-800/30">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Contact</p>
+                  <p className="font-semibold text-foreground mt-1">{selectedShipment.receiverContact}</p>
                 </motion.div>
               </motion.div>
 
@@ -252,7 +273,9 @@ export default function CustomerDashboard() {
             </CardContent>
           </Card>
         </motion.div>
-      )}
+        )}
+      </motion.section>
+      </div>
     </div>
   )
 }
