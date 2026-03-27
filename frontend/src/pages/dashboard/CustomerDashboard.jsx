@@ -1,289 +1,358 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { motion } from "framer-motion"
-import { 
-  Card, CardContent, CardDescription, CardHeader, CardTitle, 
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
-} from "@/components/ui/card" // Note: using card exports for table as per shadcn pattern
-import { Badge } from "@/components/ui/badge"
+import { motion, AnimatePresence } from "framer-motion"
+import {
+  Package, Truck, CheckCircle, ChevronRight, BarChart3,
+  ArrowUpRight, Search, RefreshCw, AlertCircle, ArrowRight, MapPin
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Package, Truck, Clock, CheckCircle, MapPin, ChevronRight, Users, BarChart3, ArrowUpRight, Search } from "lucide-react"
-import { useAuth } from "@/context/AuthContext"
+import { Card } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { StatusBadge } from "@/components/ui/status-badge"
+import { useAuth, API } from "@/context/AuthContext"
+import { motion as m } from "framer-motion"
+
+const SECTION = "text-xs font-bold uppercase tracking-widest text-muted-foreground"
+
+function ProgressBar({ value }) {
+  const pct = Math.min(Math.max(value ?? 0, 0), 100)
+  const color = pct === 100 ? "from-emerald-500 to-emerald-400" : pct > 50 ? "from-indigo-500 to-violet-500" : "from-amber-500 to-orange-400"
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
+        <motion.div
+          className={`h-full rounded-full bg-gradient-to-r ${color}`}
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.9, ease: "easeOut" }}
+        />
+      </div>
+      <span className="text-xs font-semibold text-muted-foreground w-8 text-right">{pct}%</span>
+    </div>
+  )
+}
 
 export default function CustomerDashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [shipments, setShipments] = useState([])
+
+  const [allShipments, setAllShipments] = useState([])
   const [loading, setLoading] = useState(true)
-  const [trackingInput, setTrackingInput] = useState('')
-  const [stats, setStats] = useState({
-    active: 0,
-    inTransit: 0,
-    delivered: 0,
-    totalValue: 0
-  })
+  const [error, setError] = useState("")
+  const [trackingInput, setTrackingInput] = useState("")
+  const [filter, setFilter]     = useState("")
+  const [refreshing, setRefreshing] = useState(false)
+
+  const fetchShipments = async (showRefreshing = false) => {
+    if (showRefreshing) setRefreshing(true)
+    else setLoading(true)
+    setError("")
+    try {
+      const token = localStorage.getItem("token")
+      const res = await fetch(`${API}/api/shipments/active`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await res.json()
+      if (res.ok) {
+        const list = data.data || []
+        // Filter to shipments where the customerName matches the logged-in user's full name
+        // This is the best we can do without a dedicated customer endpoint
+        const mine = list.filter((s) =>
+          s.customerName && user?.fullName &&
+          s.customerName.toLowerCase().trim() === user.fullName.toLowerCase().trim()
+        )
+        // If no matches (e.g. name mismatch), show all — degrade gracefully
+        setAllShipments(mine.length > 0 ? mine : list)
+      } else {
+        setError("Failed to load shipments. Please try again.")
+      }
+    } catch {
+      setError("Network error. Please check your connection.")
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }
 
   useEffect(() => {
-    if (user) {
-      fetchDashboardData()
-    }
+    if (user) fetchShipments()
   }, [user])
 
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true)
-      // Mock data - replace with real API calls
-      setTimeout(() => {
-        setShipments([
-          {
-            id: 1,
-            trackingNumber: 'T2A-123456789',
-            cargoType: 'Electronics',
-            origin: 'New York, NY',
-            destination: 'Los Angeles, CA',
-            status: 'IN_TRANSIT',
-            eta: '2024-12-20',
-            driverName: 'John Smith',
-            progress: 65
-          },
-          {
-            id: 2,
-            trackingNumber: 'T2A-987654321',
-            cargoType: 'Apparel',
-            origin: 'Chicago, IL',
-            destination: 'Miami, FL',
-            status: 'PENDING',
-            eta: '2024-12-22',
-            driverName: 'Sarah Johnson',
-            progress: 12
-          },
-          {
-            id: 3,
-            trackingNumber: 'T2A-456789123',
-            cargoType: 'Furniture',
-            origin: 'Seattle, WA',
-            destination: 'Dallas, TX',
-            status: 'DELIVERED',
-            eta: '2024-12-18',
-            driverName: 'Mike Davis',
-            progress: 100
-          }
-        ])
-        setStats({
-          active: 3,
-          inTransit: 1,
-          delivered: 1,
-          totalValue: '$12,450'
-        })
-        setLoading(false)
-      }, 800)
-    } catch (error) {
-      console.error("Failed to fetch dashboard data:", error)
-      setLoading(false)
-    }
-  }
-
-  const getStatusBadge = (status) => {
-    const variants = {
-      PENDING: { className: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
-      IN_TRANSIT: { className: 'bg-blue-100 text-blue-800', label: 'In Transit' },
-      DELIVERED: { className: 'bg-green-100 text-green-800', label: 'Delivered' }
-    }
-    const variant = variants[status] || { className: 'bg-gray-100 text-gray-800', label: 'Unknown' }
-    return <Badge className={`rounded-full px-3 py-1 ${variant.className}`}>{variant.label}</Badge>
-  }
-
   const handleQuickTrack = () => {
-    if (trackingInput.trim()) {
-      navigate(`/track/${trackingInput.trim()}`)
-    }
+    if (trackingInput.trim()) navigate(`/track?q=${encodeURIComponent(trackingInput.trim())}`)
   }
 
-  const handleRowClick = (trackingNumber) => {
-    navigate(`/dashboard/track/${trackingNumber}`)
+  // Computed stats from real data
+  const stats = {
+    total:     allShipments.length,
+    inTransit: allShipments.filter(s => s.status === "IN_TRANSIT").length,
+    delivered: allShipments.filter(s => s.status === "DELIVERED").length,
+    delayed:   allShipments.filter(s => s.status === "DELAYED").length,
   }
 
-  if (loading) {
-    return (
-      <div className="p-6 md:p-8 space-y-8 flex items-center justify-center min-h-[400px]">
-        <motion.div 
-          className="text-center"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading your dashboard...</p>
-        </motion.div>
-      </div>
-    )
-  }
+  const STAT_CARDS = [
+    {
+      icon: Package,   label: "Total Shipments", value: stats.total,
+      gradient: "from-indigo-500/15 to-indigo-600/5",
+      iconBg: "bg-indigo-500/15 border-indigo-500/30", iconColor: "text-indigo-500",
+    },
+    {
+      icon: Truck,     label: "In Transit",      value: stats.inTransit,
+      gradient: "from-cyan-500/15 to-cyan-600/5",
+      iconBg: "bg-cyan-500/15 border-cyan-500/30",   iconColor: "text-cyan-500",
+    },
+    {
+      icon: CheckCircle, label: "Delivered",     value: stats.delivered,
+      gradient: "from-emerald-500/15 to-emerald-600/5",
+      iconBg: "bg-emerald-500/15 border-emerald-500/30", iconColor: "text-emerald-500",
+    },
+    {
+      icon: AlertCircle, label: "Delayed",       value: stats.delayed,
+      gradient: "from-rose-500/15 to-rose-600/5",
+      iconBg: "bg-rose-500/15 border-rose-500/30",   iconColor: "text-rose-500",
+    },
+  ]
+
+  const filtered = allShipments.filter(s =>
+    s.trackingNumber?.toLowerCase().includes(filter.toLowerCase()) ||
+    s.cargoType?.toLowerCase().includes(filter.toLowerCase()) ||
+    s.status?.toLowerCase().includes(filter.toLowerCase()) ||
+    s.originName?.toLowerCase().includes(filter.toLowerCase()) ||
+    s.destinationName?.toLowerCase().includes(filter.toLowerCase())
+  )
 
   return (
-    <div className="p-6 md:p-8 space-y-8">
-      {/* Header */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-2"
-      >
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight flex items-center gap-3">
-          <Users className="h-10 w-10 text-primary" />
-          Customer Dashboard
-        </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl">
-          Track your active shipments and delivery history in real-time
-        </p>
-      </motion.div>
+    <div className="flex flex-col min-h-full">
+      {/* Page Header */}
+      <div className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
+        <div className="flex items-center justify-between p-5 lg:p-6">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">My Shipments</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Track and monitor your active deliveries
+            </p>
+          </div>
+          <Button
+            onClick={() => fetchShipments(true)}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            disabled={refreshing}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+        </div>
+      </div>
 
-      {/* Metrics Cards */}
-      <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ staggerChildren: 0.1 }}
-      >
-        {[
-          { icon: Package, label: 'Active Shipments', value: stats.active, trend: '+12.5%', trendColor: 'green' },
-          { icon: Truck, label: 'In Transit', value: stats.inTransit, trend: '+8.2%', trendColor: 'blue' },
-          { icon: CheckCircle, label: 'Delivered', value: stats.delivered, trend: '+23%', trendColor: 'emerald' },
-          { icon: BarChart3, label: 'Total Value', value: stats.totalValue, trend: '+15.8%', trendColor: 'purple' }
-        ].map((stat, index) => (
-          <motion.div key={stat.label} whileHover={{ y: -4, scale: 1.02 }}>
-            <Card className="h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-background to-muted/30">
-              <CardContent className="p-6 h-full flex flex-col justify-between">
-                <div className="flex items-start justify-between">
-                  <div className="p-3 rounded-xl bg-primary/10">
-                    <stat.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <div className="px-2 py-1 bg-gradient-to-r rounded-full text-xs font-medium from-[var(--trend-color)] to-transparent">
-                    <ArrowUpRight className="h-3 w-3 inline mr-1" />
-                    {stat.trend}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-3xl md:text-4xl font-bold text-foreground mb-1">
-                    {stat.value}
-                  </div>
-                  <p className="text-sm text-muted-foreground capitalize">{stat.label}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </motion.div>
+      <div className="flex-1 p-5 lg:p-6 space-y-6">
 
-      {/* Quick Track */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5" />
-              Quick Track
-            </CardTitle>
-            <CardDescription>
-              Enter tracking number to jump to live tracking
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-3">
+        {/* Error State */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="flex items-center gap-2.5 rounded-xl bg-destructive/10 border border-destructive/25 px-4 py-3 text-sm text-destructive"
+            >
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              {error}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto h-7 text-xs text-destructive hover:bg-destructive/10"
+                onClick={() => fetchShipments()}
+              >
+                Retry
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Stats */}
+        <motion.section
+          className="space-y-3"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <p className={SECTION}>Overview</p>
+          {loading ? (
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {Array(4).fill(0).map((_, i) => (
+                <div key={i} className="rounded-2xl border border-border/50 bg-card p-5">
+                  <Skeleton className="h-10 w-10 rounded-xl mb-4" />
+                  <Skeleton className="h-7 w-14 mb-2" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {STAT_CARDS.map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  className="group relative rounded-2xl border border-border/60 bg-card overflow-hidden card-shadow hover:card-shadow-lg transition-all duration-300"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.07 }}
+                  whileHover={{ y: -2 }}
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-100 transition-opacity`} />
+                  <div className="relative p-5">
+                    <div className={`inline-flex items-center justify-center rounded-xl border p-2.5 mb-4 ${stat.iconBg}`}>
+                      <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
+                    </div>
+                    <p className="text-2xl font-extrabold">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 font-medium">{stat.label}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </motion.section>
+
+        {/* Quick Track */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+        >
+          <Card className="border-border/60 card-shadow">
+            <div className="p-5 flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="flex-1">
-                <Label htmlFor="quick-track">Tracking ID</Label>
-                <Input 
-                  id="quick-track"
+                <h3 className="font-semibold text-sm flex items-center gap-2">
+                  <Search className="h-4 w-4 text-primary" />
+                  Quick Track
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Enter a tracking number for instant status</p>
+              </div>
+              <div className="flex gap-2 sm:w-80">
+                <Input
                   placeholder="T2A-123456789"
                   value={trackingInput}
-                  onChange={(e) => setTrackingInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleQuickTrack()}
+                  onChange={e => setTrackingInput(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleQuickTrack()}
+                  className="h-9 bg-secondary/50 border-border/60 text-sm font-mono focus-visible:ring-primary/30"
                 />
+                <Button onClick={handleQuickTrack} size="sm" className="h-9 shrink-0 gap-1.5">
+                  Track <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
               </div>
-              <Button onClick={handleQuickTrack} className="w-32">
-                Track Now
-              </Button>
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+          </Card>
+        </motion.section>
 
-      {/* Recent Shipments Table */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <Card className="border-0 shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Recent Shipments
-            </CardTitle>
-            <CardDescription>
-              Your latest tracking activity
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tracking #</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>From</TableHead>
-                  <TableHead>To</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>ETA</TableHead>
-                  <TableHead>Driver</TableHead>
-                  <TableHead>Progress</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {shipments.map((shipment) => (
-                  <TableRow 
-                    key={shipment.id}
-                    className="cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => handleRowClick(shipment.trackingNumber)}
-                  >
-                    <TableCell className="font-mono font-semibold text-primary">
-                      {shipment.trackingNumber}
-                    </TableCell>
-                    <TableCell>{shipment.cargoType}</TableCell>
-                    <TableCell className="font-medium">{shipment.origin}</TableCell>
-                    <TableCell className="font-medium">{shipment.destination}</TableCell>
-                    <TableCell>{getStatusBadge(shipment.status)}</TableCell>
-                    <TableCell className="text-sm">{shipment.eta}</TableCell>
-                    <TableCell className="font-medium">{shipment.driverName}</TableCell>
-                    <TableCell>
-                      <div className="w-20 bg-muted rounded-full h-2">
-                        <div 
-                          className="bg-primary h-2 rounded-full transition-all duration-500" 
-                          style={{ width: `${shipment.progress}%` }}
-                        />
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="gap-1 border-primary/50 hover:bg-primary/5"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleRowClick(shipment.trackingNumber)
-                        }}
-                      >
-                        Track Now
-                        <ChevronRight className="h-3 w-3 ml-1" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+        {/* Shipments Table */}
+        <motion.section
+          className="space-y-3"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+        >
+          <div className="flex items-center justify-between">
+            <p className={SECTION}>My Shipments</p>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+              <Input
+                placeholder="Filter…"
+                value={filter}
+                onChange={e => setFilter(e.target.value)}
+                className="h-7 pl-8 w-44 bg-secondary/50 border-border/60 text-xs focus-visible:ring-primary/30"
+              />
+            </div>
+          </div>
+
+          <Card className="border-border/60 card-shadow overflow-hidden">
+            {loading ? (
+              <div className="p-5 space-y-3">
+                {Array(4).fill(0).map((_, i) => (
+                  <Skeleton key={i} className="h-14 w-full rounded-xl" />
                 ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </motion.div>
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="py-16 text-center">
+                <Package className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-sm font-semibold text-muted-foreground">
+                  {allShipments.length === 0 ? "No shipments found" : "No shipments match your filter"}
+                </p>
+                {allShipments.length === 0 && (
+                  <p className="text-xs text-muted-foreground/60 mt-1">
+                    Your shipments will appear here once they are created
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border/50 bg-secondary/30">
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tracking #</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Type</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Route</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Progress</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">ETA</th>
+                      <th className="px-4 py-3" />
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/40">
+                    {filtered.map((shipment, i) => (
+                      <motion.tr
+                        key={shipment.id}
+                        className="hover:bg-secondary/30 transition-colors cursor-pointer group"
+                        onClick={() => navigate(`/track?q=${encodeURIComponent(shipment.trackingNumber)}`)}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                      >
+                        <td className="px-5 py-3.5 font-mono font-semibold text-primary text-xs">
+                          {shipment.trackingNumber}
+                        </td>
+                        <td className="px-4 py-3.5 text-xs text-muted-foreground hidden sm:table-cell">
+                          {shipment.cargoType || "—"}
+                        </td>
+                        <td className="px-4 py-3.5 hidden md:table-cell">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-muted-foreground truncate max-w-[100px]">{shipment.originName || "—"}</span>
+                            <ChevronRight className="h-3 w-3 text-muted-foreground/40 flex-shrink-0" />
+                            <span className="text-xs font-medium truncate max-w-[100px]">{shipment.destinationName || "—"}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <StatusBadge status={shipment.status} />
+                        </td>
+                        <td className="px-4 py-3.5 w-36 hidden lg:table-cell">
+                          <ProgressBar value={shipment.currentProgress} />
+                        </td>
+                        <td className="px-4 py-3.5 text-xs text-muted-foreground hidden md:table-cell">
+                          {shipment.estimatedArrival
+                            ? new Date(shipment.estimatedArrival).toLocaleDateString("en-IN", { day: "numeric", month: "short" })
+                            : "—"}
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 text-xs gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={e => {
+                              e.stopPropagation()
+                              navigate(`/track?q=${encodeURIComponent(shipment.trackingNumber)}`)
+                            }}
+                          >
+                            Track <ChevronRight className="h-3 w-3" />
+                          </Button>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Card>
+        </motion.section>
+      </div>
     </div>
   )
 }

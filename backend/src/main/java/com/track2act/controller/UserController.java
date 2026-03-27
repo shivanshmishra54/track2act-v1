@@ -27,7 +27,7 @@ public class UserController {
     }
 
     @GetMapping("/role/{role}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'COMPANY_OFFICER')")
     public ResponseEntity<ApiResponse<List<UserDTO>>> getUsersByRole(@PathVariable String role) {
         List<UserDTO> users = userService.getUsersByRole(role);
         return ResponseEntity.ok(ApiResponse.success("Users with role " + role + " fetched", users));

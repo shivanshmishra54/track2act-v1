@@ -43,6 +43,7 @@ public class User {
     private String companyName;
 
     @Column(name = "is_active", nullable = false)
+    @Builder.Default
     private Boolean isActive = true;
 
     @OneToMany(mappedBy = "assignedDriver", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

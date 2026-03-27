@@ -3,9 +3,34 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { StatusBadge } from "@/components/ui/status-badge"
 import { useAuth, API } from "@/context/AuthContext"
-import { Search, MapPin, Package, Clock, CheckCircle2, Navigation, AlertCircle, Truck } from "lucide-react"
+import {
+  Search, MapPin, Package, Clock, CheckCircle2,
+  Navigation, AlertCircle, Truck, ChevronRight, ArrowRight
+} from "lucide-react"
+
+function ProgressBar({ value }) {
+  return (
+    <div className="w-full bg-border/50 rounded-full h-2 overflow-hidden">
+      <motion.div
+        className="bg-gradient-to-r from-primary to-violet-500 h-full rounded-full"
+        initial={{ width: 0 }}
+        animate={{ width: `${value ?? 0}%` }}
+        transition={{ duration: 1, ease: "easeOut" }}
+      />
+    </div>
+  )
+}
+
+function DetailBox({ label, value }) {
+  return (
+    <div className="rounded-xl bg-secondary/40 border border-border/50 p-4">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">{label}</p>
+      <p className="text-sm font-semibold text-foreground">{value || "—"}</p>
+    </div>
+  )
+}
 
 export default function TrackShipment() {
   const { user } = useAuth()
@@ -14,37 +39,20 @@ export default function TrackShipment() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const getStatusColor = (status) => {
-    const colors = {
-      PENDING: "bg-yellow-100 text-yellow-900 border-yellow-300",
-      IN_TRANSIT: "bg-blue-100 text-blue-900 border-blue-300",
-      DELIVERED: "bg-green-100 text-green-900 border-green-300",
-      CANCELLED: "bg-red-100 text-red-900 border-red-300",
-      DELAYED: "bg-orange-100 text-orange-900 border-orange-300",
-      AT_RISK: "bg-red-100 text-red-900 border-red-300"
-    }
-    return colors[status] || "bg-gray-100 text-gray-900"
-  }
-
   const handleTrack = async (e) => {
     e.preventDefault()
     if (!trackingNumber.trim()) {
       setError("Please enter a tracking number")
       return
     }
-
     setLoading(true)
     setError("")
     setShipment(null)
-
     try {
       const response = await fetch(`${API}/api/shipments?trackingNumber=${trackingNumber}`, {
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
-        }
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       const data = await response.json()
-      
       if (response.ok && data.data) {
         setShipment(data.data)
       } else {
@@ -52,61 +60,83 @@ export default function TrackShipment() {
       }
     } catch (err) {
       setError("Error fetching shipment. Please try again.")
-      console.log("[v0] Error:", err)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-background pt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          className="mb-12 border-b border-border/50 pb-8 sticky top-20 bg-background/80 backdrop-blur-sm -mx-4 px-4 sm:px-6 lg:px-8 -mt-20 pt-20"
+    <div className="min-h-screen bg-background pt-14">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+        {/* Page Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
         >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Package className="w-6 h-6 text-primary" />
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 border border-primary/25">
+              <Package className="w-5 h-5 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold">Track Your Shipment</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Track Your Shipment</h1>
           </div>
-          <p className="text-muted-foreground text-base">Enter your tracking number for real-time delivery updates</p>
+          <p className="text-muted-foreground ml-[52px]">
+            Enter your tracking number for real-time delivery updates
+          </p>
         </motion.div>
 
         {/* Search Card */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <Card className="border border-border/50 bg-background/50 backdrop-blur-sm hover:border-border/75 transition-all rounded-xl mb-8">
-            <CardHeader className="pb-6 border-b border-border/50 bg-gradient-to-r from-primary/5 to-primary/0">
-              <CardTitle>Find Your Shipment</CardTitle>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
+        >
+          <Card className="border-border/60 card-shadow overflow-hidden">
+            <CardHeader className="border-b border-border/50 bg-secondary/20 pb-4">
+              <CardTitle className="text-base">Find Your Shipment</CardTitle>
               <CardDescription>Enter your tracking number for real-time updates</CardDescription>
             </CardHeader>
-            <CardContent className="pt-6">
-              <form onSubmit={handleTrack} className="space-y-4">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <CardContent className="pt-5">
+              <form onSubmit={handleTrack} className="flex gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                   <Input
                     type="text"
-                    placeholder="Enter tracking number (e.g., TRK123456789)"
+                    placeholder="Enter tracking number (e.g., T2A-123456789)"
                     value={trackingNumber}
                     onChange={(e) => setTrackingNumber(e.target.value)}
-                    className="pl-12 h-11 text-base rounded-lg border-border/50 bg-secondary/50 focus:border-primary/50 focus:ring-primary/20 transition-colors"
+                    className="pl-10 h-11 font-mono bg-background/60 border-border/70 focus-visible:ring-primary/30 text-sm"
                   />
                 </div>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={loading}
-                  className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-lg"
+                  className="h-11 px-6 font-semibold gap-2 shadow-md hover:shadow-primary/25 transition-all"
                 >
-                  {loading ? "Tracking..." : "Track Shipment"}
+                  {loading ? (
+                    <>
+                      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      Tracking…
+                    </>
+                  ) : (
+                    <>
+                      Track
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </>
+                  )}
                 </Button>
               </form>
+
               {error && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 p-4 bg-destructive/10 border border-destructive/30 rounded-lg flex gap-3">
-                  <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-                  <p className="text-destructive">{error}</p>
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 flex items-start gap-2.5 rounded-xl bg-destructive/10 border border-destructive/25 px-4 py-3"
+                >
+                  <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-destructive">{error}</p>
                 </motion.div>
               )}
             </CardContent>
@@ -115,113 +145,125 @@ export default function TrackShipment() {
 
         {/* Shipment Details */}
         {shipment && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <Card className="border border-border/50 bg-background/50 backdrop-blur-sm hover:border-border/75 transition-all rounded-xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 border-b border-border/50 pb-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+          >
+            <Card className="border-border/60 card-shadow overflow-hidden">
+              {/* Card Header */}
+              <CardHeader className="border-b border-border/50 bg-secondary/20">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <CardTitle className="text-2xl">{shipment.trackingNumber}</CardTitle>
-                    <CardDescription className="mt-2 text-muted-foreground">{shipment.cargoType}</CardDescription>
+                    <p className="font-mono font-bold text-lg text-primary">{shipment.trackingNumber}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{shipment.cargoType}</p>
                   </div>
-                  <Badge className={`${getStatusColor(shipment.status)} border`}>
-                    {shipment.status.replace('_', ' ')}
-                  </Badge>
+                  <StatusBadge status={shipment.status} />
                 </div>
               </CardHeader>
 
-              <CardContent className="pt-8 space-y-8">
+              <CardContent className="pt-6 space-y-8">
                 {/* Route Information */}
-                <div className="space-y-6">
-                  <h3 className="text-lg font-bold text-gray-900">Route Information</h3>
-                  
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {/* From */}
-                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="bg-blue-50/50 dark:bg-blue-950/20 rounded-lg p-5 border border-blue-200/50 dark:border-blue-800/30">
-                      <div className="flex items-center gap-2 mb-2">
-                        <MapPin className="w-4 h-4 text-primary" />
-                        <p className="text-xs font-semibold text-muted-foreground uppercase">From</p>
-                      </div>
-                      <p className="text-lg font-bold">{shipment.originName}</p>
-                    </motion.div>
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+                    Route Information
+                  </h3>
 
-                    {/* To */}
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-green-50/50 dark:bg-green-950/20 rounded-lg p-5 border border-green-200/50 dark:border-green-800/30">
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div className="rounded-xl bg-secondary/40 border border-border/50 p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <MapPin className="w-4 h-4 text-primary" />
-                        <p className="text-xs font-semibold text-muted-foreground uppercase">To</p>
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15">
+                          <MapPin className="w-3 h-3 text-primary" />
+                        </div>
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">From</p>
                       </div>
-                      <p className="text-lg font-bold">{shipment.destinationName}</p>
-                    </motion.div>
+                      <p className="text-base font-bold text-foreground">{shipment.originName}</p>
+                    </div>
+
+                    <div className="rounded-xl bg-secondary/40 border border-border/50 p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-success/15">
+                          <MapPin className="w-3 h-3 text-success" />
+                        </div>
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">To</p>
+                      </div>
+                      <p className="text-base font-bold text-foreground">{shipment.destinationName}</p>
+                    </div>
                   </div>
 
-                  {/* Route Visual */}
-                  <div className="bg-secondary/30 rounded-lg p-5 space-y-4">
-                    <div className="flex items-center gap-4">
-                      <div className="flex-1 space-y-1">
-                        <div className="text-xs font-semibold text-muted-foreground uppercase">Departure</div>
-                        <div className="font-semibold text-foreground">{shipment.originName}</div>
+                  {/* Progress bar */}
+                  <div className="rounded-xl bg-secondary/30 border border-border/40 p-5 space-y-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="space-y-0.5">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Departure</p>
+                        <p className="font-semibold text-foreground">{shipment.originName}</p>
                       </div>
-                      <div className="flex flex-col items-center">
-                        <Navigation className="w-5 h-5 text-primary rotate-45" />
+                      <div className="flex flex-col items-center px-4">
+                        <Navigation className="w-4 h-4 text-primary rotate-45" />
                       </div>
-                      <div className="flex-1 space-y-1 text-right">
-                        <div className="text-xs font-semibold text-muted-foreground uppercase">Delivery</div>
-                        <div className="font-semibold text-foreground">{shipment.destinationName}</div>
+                      <div className="space-y-0.5 text-right">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Delivery</p>
+                        <p className="font-semibold text-foreground">{shipment.destinationName}</p>
                       </div>
                     </div>
-                    
-                    <div className="w-full bg-border/50 rounded-full h-2 relative overflow-hidden">
-                      <motion.div
-                        className="bg-gradient-to-r from-primary to-primary/50 h-full rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${shipment.currentProgress}%` }}
-                        transition={{ duration: 1, ease: "easeOut" }}
-                      />
-                    </div>
-                    <div className="flex justify-between text-sm font-semibold text-muted-foreground">
+                    <ProgressBar value={shipment.currentProgress} />
+                    <div className="flex justify-between text-xs font-semibold text-muted-foreground">
                       <span>Start</span>
-                      <span className="text-primary">{shipment.currentProgress}%</span>
+                      <span className="text-primary font-bold">{shipment.currentProgress}% complete</span>
                       <span>Delivered</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Details Grid */}
-                <div className="border-t pt-8">
-                  <h3 className="text-lg font-bold text-gray-900 mb-6">Shipment Details</h3>
-                  <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4 border-t border-border/40 pt-6">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+                    Shipment Details
+                  </h3>
+                  <div className="grid md:grid-cols-3 gap-3">
                     <DetailBox label="Sender" value={shipment.customerName} />
                     <DetailBox label="Receiver" value={shipment.receiverName} />
                     <DetailBox label="Contact" value={shipment.receiverContact} />
-                    <DetailBox label="Weight" value={`${shipment.cargoWeight || 'N/A'} kg`} />
-                    <DetailBox label="Expected Delivery" value={new Date(shipment.estimatedArrival).toLocaleDateString()} />
-                    <DetailBox label="Driver" value={shipment.assignedDriverName || 'Not Assigned'} />
+                    <DetailBox label="Weight" value={shipment.cargoWeight ? `${shipment.cargoWeight} kg` : null} />
+                    <DetailBox
+                      label="Expected Delivery"
+                      value={shipment.estimatedArrival ? new Date(shipment.estimatedArrival).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : null}
+                    />
+                    <DetailBox label="Assigned Driver" value={shipment.assignedDriverName} />
                   </div>
                 </div>
 
                 {/* Tracking History */}
-                {shipment.trackingHistory && shipment.trackingHistory.length > 0 && (
-                  <div className="border-t border-border/50 pt-8">
-                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                      <Truck className="w-5 h-5 text-primary" />
+                {shipment.trackingHistory?.length > 0 && (
+                  <div className="space-y-4 border-t border-border/40 pt-6">
+                    <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                      <Truck className="w-4 h-4 text-primary" />
                       Tracking History
                     </h3>
-                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                    <div className="space-y-2 max-h-80 overflow-y-auto rounded-xl">
                       {shipment.trackingHistory.map((update, idx) => (
                         <motion.div
                           key={idx}
-                          initial={{ opacity: 0, x: -20 }}
+                          initial={{ opacity: 0, x: -12 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: idx * 0.05 }}
-                          className="border-l-4 border-primary bg-gradient-to-r from-primary/5 to-transparent p-4 rounded-r-lg"
+                          transition={{ delay: idx * 0.04 }}
+                          className="border-l-2 border-primary/50 bg-secondary/30 hover:bg-secondary/50 transition-colors pl-4 pr-4 py-3 rounded-r-xl"
                         >
-                          <div className="flex items-start justify-between">
+                          <div className="flex items-start justify-between gap-3">
                             <div className="flex-1">
-                              <p className="font-semibold">📍 {update.latitude.toFixed(4)}, {update.longitude.toFixed(4)}</p>
-                              <p className="text-sm text-muted-foreground mt-1">{new Date(update.timestamp).toLocaleString()}</p>
-                              {update.statusNote && <p className="text-sm mt-2 bg-background rounded px-3 py-1 border border-border/50">💬 {update.statusNote}</p>}
+                              <p className="text-sm font-semibold font-mono">
+                                {update.latitude.toFixed(4)}, {update.longitude.toFixed(4)}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {new Date(update.timestamp).toLocaleString("en-IN")}
+                              </p>
+                              {update.statusNote && (
+                                <p className="text-xs mt-1.5 bg-background rounded-lg px-3 py-1.5 border border-border/50 inline-block">
+                                  {update.statusNote}
+                                </p>
+                              )}
                             </div>
-                            <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
+                            <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                           </div>
                         </motion.div>
                       ))}
@@ -234,14 +276,5 @@ export default function TrackShipment() {
         )}
       </div>
     </div>
-  )
-}
-
-function DetailBox({ label, value }) {
-  return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-secondary/30 rounded-lg p-4 border border-border/50">
-      <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">{label}</p>
-      <p className="text-base font-semibold text-foreground">{value}</p>
-    </motion.div>
   )
 }

@@ -13,6 +13,8 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
     
     List<Shipment> findByStatusIn(List<Status> statuses);
     
+    List<Shipment> findByCustomerName(String customerName);
+
     List<Shipment> findByAssignedDriver_Id(UUID driverId);
     
     List<Shipment> findByCreatedBy_Id(UUID creatorId);

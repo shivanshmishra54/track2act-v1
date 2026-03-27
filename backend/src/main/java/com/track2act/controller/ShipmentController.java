@@ -3,6 +3,7 @@ package com.track2act.controller;
 import com.track2act.dto.request.CreateShipmentRequest;
 import com.track2act.dto.request.UpdateShipmentRequest;
 import com.track2act.dto.request.LocationUpdateRequest;
+import com.track2act.dto.request.DriverStatusUpdateRequest;
 import com.track2act.dto.response.ApiResponse;
 import com.track2act.dto.response.ShipmentDTO;
 import com.track2act.dto.response.DashboardStatsDTO;
@@ -44,6 +45,12 @@ public class ShipmentController {
         return ResponseEntity.ok(ApiResponse.success("Created shipments fetched", shipments));
     }
 
+    @GetMapping("/customer")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<ApiResponse<List<ShipmentDTO>>> getMyCustomerShipments() {
+        return ResponseEntity.ok(ApiResponse.success("My shipments fetched", shipmentService.getMyCustomerShipments()));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ShipmentDTO>> getShipment(@PathVariable UUID id) {
         ShipmentDTO shipment = shipmentService.getById(id);
@@ -78,6 +85,15 @@ public class ShipmentController {
     public ResponseEntity<ApiResponse<ShipmentDTO>> updateLocation(@Valid @RequestBody LocationUpdateRequest request) {
         ShipmentDTO shipment = shipmentService.updateLocation(request);
         return ResponseEntity.ok(ApiResponse.success("Location updated", shipment));
+    }
+
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DRIVER')")
+    public ResponseEntity<ApiResponse<ShipmentDTO>> updateDriverStatus(
+            @PathVariable UUID id,
+            @Valid @RequestBody DriverStatusUpdateRequest request) {
+        ShipmentDTO shipment = shipmentService.updateDriverStatus(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Status updated successfully", shipment));
     }
 
     @GetMapping("/{id}/tracking-history")

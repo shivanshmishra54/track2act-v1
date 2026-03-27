@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Entity
@@ -39,9 +40,11 @@ public class Shipment {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
+    @Builder.Default
     private Status status = Status.PENDING;
 
-    @Column(name = "current_progress")
+    @Column(name = "current_progress", nullable = false)
+    @Builder.Default
     private Integer currentProgress = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -82,7 +85,8 @@ public class Shipment {
     private String receiverContact;
 
     @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TrackingUpdate> trackingUpdates = List.of();
+    @Builder.Default
+    private List<TrackingUpdate> trackingHistory = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

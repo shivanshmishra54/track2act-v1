@@ -6,165 +6,125 @@ import { DecisionIntelligencePanel } from "@/components/dashboard/decision-intel
 import { CompliancePanel } from "@/components/dashboard/compliance-panel"
 import { AuditLog } from "@/components/dashboard/audit-log"
 import { TaskExecutionFlow } from "@/components/dashboard/task-execution-flow"
-import { CheckCircle, AlertCircle, TrendingUp, Zap } from "lucide-react"
+import { CheckCircle, AlertCircle, TrendingUp, Zap, Activity } from "lucide-react"
 
+const SECTION_HEADER_CLASS = "text-xs font-bold uppercase tracking-widest text-muted-foreground"
+
+const STATUS_METRICS = [
+  { icon: CheckCircle, label: "System Status", value: "Operational", iconBg: "bg-emerald-500/12 border-emerald-500/25", iconColor: "text-emerald-500", valueColor: "text-emerald-600 dark:text-emerald-400", gradient: "from-emerald-500/8 to-transparent" },
+  { icon: TrendingUp, label: "Performance", value: "98.5%", iconBg: "bg-indigo-500/12 border-indigo-500/25", iconColor: "text-indigo-500", valueColor: "text-foreground", gradient: "from-indigo-500/8 to-transparent" },
+  { icon: Zap, label: "Active Operations", value: "127", iconBg: "bg-amber-500/12 border-amber-500/25", iconColor: "text-amber-500", valueColor: "text-foreground", gradient: "from-amber-500/8 to-transparent" },
+  { icon: AlertCircle, label: "Alerts", value: "3", iconBg: "bg-rose-500/12 border-rose-500/25", iconColor: "text-rose-500", valueColor: "text-rose-600 dark:text-rose-400", gradient: "from-rose-500/8 to-transparent" },
+]
 
 export default function DashboardPage() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4 },
-    },
-  }
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header Section */}
-      <motion.div 
-        className="border-b border-border/50 bg-background/95 backdrop-blur-sm sticky top-0 z-10"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <div className="p-4 lg:p-6 space-y-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Supply Chain Intelligence</h1>
-              <p className="text-sm text-muted-foreground mt-1">Real-time monitoring and control center</p>
-            </div>
-            <QuickActions />
+    <div className="flex flex-col min-h-full">
+      {/* Page Header */}
+      <div className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
+        <div className="flex flex-col gap-3 p-5 lg:p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Supply Chain Intelligence</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Real-time monitoring and control center</p>
           </div>
+          <QuickActions />
         </div>
-      </motion.div>
+      </div>
 
-      {/* Main Content */}
-      <div className="p-4 lg:p-6 space-y-6">
-        {/* Stats Section */}
+      <div className="flex-1 p-5 lg:p-6 space-y-8">
+
+        {/* Shipment KPIs */}
         <motion.section
-          className="space-y-4"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
+          className="space-y-3"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
         >
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/50 rounded-full"></div>
-            <h2 className="text-lg font-semibold">Overview Metrics</h2>
-          </div>
-          <motion.div variants={itemVariants}>
-            <StatsCards />
-          </motion.div>
+          <p className={SECTION_HEADER_CLASS}>Shipment KPIs</p>
+          <StatsCards />
         </motion.section>
 
-        {/* Primary Metrics Grid */}
-        <motion.section 
-          className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
+        {/* Status Metrics */}
+        <motion.section
+          className="space-y-3"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.08 }}
         >
-          {[
-            { icon: CheckCircle, label: "System Status", value: "Operational", color: "text-green-500", bg: "bg-green-50 dark:bg-green-950" },
-            { icon: TrendingUp, label: "Performance", value: "98.5%", color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950" },
-            { icon: Zap, label: "Active Operations", value: "127", color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-950" },
-            { icon: AlertCircle, label: "Alerts", value: "3", color: "text-red-500", bg: "bg-red-50 dark:bg-red-950" },
-          ].map((item, idx) => (
-            <motion.div
-              key={idx}
-              variants={itemVariants}
-              className={`rounded-lg border border-border/50 p-4 ${item.bg} backdrop-blur-sm transition-all hover:shadow-md hover:border-border`}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className={`p-2 rounded-lg bg-background/50 ${item.color}`}>
-                  <item.icon className="w-5 h-5" />
+          <p className={SECTION_HEADER_CLASS}>System Status</p>
+          <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+            {STATUS_METRICS.map((item, idx) => (
+              <motion.div
+                key={item.label}
+                className={`group relative rounded-2xl border border-border/60 bg-card overflow-hidden card-shadow transition-all duration-200 hover:-translate-y-0.5 hover:card-shadow-lg`}
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.12 + idx * 0.065 }}
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-100 transition-opacity`} />
+                <div className="relative p-4">
+                  <div className={`inline-flex items-center justify-center rounded-xl border p-2.5 mb-3 ${item.iconBg}`}>
+                    <item.icon className={`h-4 w-4 ${item.iconColor}`} />
+                  </div>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide mb-1">{item.label}</p>
+                  <p className={`text-xl font-extrabold ${item.valueColor}`}>{item.value}</p>
                 </div>
-              </div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold">{item.label}</p>
-              <p className="text-2xl font-bold mt-1">{item.value}</p>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
         </motion.section>
 
-        {/* Maps and Intelligence Section */}
+        {/* Live Map + Decision Intelligence */}
         <motion.section
-          className="space-y-4"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
+          className="space-y-3"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.15 }}
         >
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/50 rounded-full"></div>
-            <h2 className="text-lg font-semibold">Real-Time Tracking & Analysis</h2>
-          </div>
-          <motion.div 
-            className="grid gap-6 lg:grid-cols-3"
-            variants={itemVariants}
-          >
-            <div className="lg:col-span-2 rounded-xl border border-border/50 overflow-hidden bg-background/50 backdrop-blur-sm hover:border-border/75 transition-all">
-              <div className="h-[400px] lg:h-[500px]">
+          <p className={SECTION_HEADER_CLASS}>Real-Time Tracking & Analysis</p>
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div className="lg:col-span-2 rounded-2xl border border-border/60 overflow-hidden bg-card card-shadow hover:card-shadow-lg hover:border-border transition-all duration-300">
+              <div className="h-[420px] lg:h-[500px]">
                 <LiveMap />
               </div>
             </div>
-            <div className="rounded-xl border border-border/50 overflow-hidden bg-background/50 backdrop-blur-sm hover:border-border/75 transition-all">
-              <div className="h-[400px] lg:h-[500px]">
+            <div className="rounded-2xl border border-border/60 overflow-hidden bg-card card-shadow hover:card-shadow-lg hover:border-border transition-all duration-300">
+              <div className="h-[420px] lg:h-[500px]">
                 <DecisionIntelligencePanel />
               </div>
             </div>
-          </motion.div>
+          </div>
         </motion.section>
 
-        {/* Execution Flow and Compliance */}
+        {/* Operations & Compliance */}
         <motion.section
-          className="space-y-4"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
+          className="space-y-3"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.2 }}
         >
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/50 rounded-full"></div>
-            <h2 className="text-lg font-semibold">Operations & Compliance</h2>
-          </div>
-          <motion.div 
-            className="grid gap-6 lg:grid-cols-2"
-            variants={itemVariants}
-          >
-            <div className="rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm hover:border-border/75 transition-all overflow-hidden">
+          <p className={SECTION_HEADER_CLASS}>Operations & Compliance</p>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="rounded-2xl border border-border/60 bg-card card-shadow hover:card-shadow-lg hover:border-border transition-all duration-300 overflow-hidden">
               <TaskExecutionFlow />
             </div>
-            <div className="rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm hover:border-border/75 transition-all overflow-hidden">
+            <div className="rounded-2xl border border-border/60 bg-card card-shadow hover:card-shadow-lg hover:border-border transition-all duration-300 overflow-hidden">
               <CompliancePanel />
             </div>
-          </motion.div>
+          </div>
         </motion.section>
 
         {/* Audit Trail */}
         <motion.section
-          className="space-y-4"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
+          className="space-y-3"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.25 }}
         >
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/50 rounded-full"></div>
-            <h2 className="text-lg font-semibold">Activity Log</h2>
-          </div>
-          <motion.div 
-            className="rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm hover:border-border/75 transition-all overflow-hidden"
-            variants={itemVariants}
-          >
+          <p className={SECTION_HEADER_CLASS}>Activity Log</p>
+          <div className="rounded-2xl border border-border/60 bg-card card-shadow hover:card-shadow-lg hover:border-border transition-all duration-300 overflow-hidden">
             <AuditLog />
-          </motion.div>
+          </div>
         </motion.section>
       </div>
     </div>

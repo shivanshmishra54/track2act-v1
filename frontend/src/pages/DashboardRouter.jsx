@@ -1,45 +1,38 @@
 import { useAuth } from "../context/AuthContext"
-import { Navigate, Outlet } from "react-router-dom"
-import DashboardLayout from "./dashboard/DashboardLayout"
+import { Navigate } from "react-router-dom"
 import AdminDashboard from "./dashboard/AdminDashboard"
-import DriverDashboard from "./dashboard/DriverDashboard"
-import CustomerDashboard from "./dashboard/CustomerDashboard"
-import CompanyOfficerDashboard from "./dashboard/CompanyOfficerDashboard"
+import DriverOverview from "./dashboard/driver/DriverOverview"
+import CustomerOverview from "./dashboard/customer/CustomerOverview"
+import CompanyOfficerOverview from "./dashboard/officer/CompanyOfficerOverview"
 import AnalystDashboard from "./dashboard/AnalystDashboard"
 
+const ROLE_DASHBOARD = {
+  ADMIN:          AdminDashboard,
+  DRIVER:         DriverOverview,
+  COMPANY_OFFICER: CompanyOfficerOverview,
+  PORT_MANAGER:   CompanyOfficerOverview,
+  ANALYST:        AnalystDashboard,
+  CUSTOMER:       CustomerOverview,
+}
 
 export default function DashboardRouter() {
   const { user, loading } = useAuth()
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your dashboard...</p>
+      <div className="flex flex-1 items-center justify-center py-24">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading your dashboard…</p>
         </div>
       </div>
     )
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />
-  }
+  if (!user) return <Navigate to="/login" replace />
 
-  const userRole = user.role
-
-  const DashboardComponent = {
-    ADMIN: AdminDashboard,
-    DRIVER: DriverDashboard,
-    COMPANY_OFFICER: CompanyOfficerDashboard,
-    PORT_MANAGER: CompanyOfficerDashboard,
-    ANALYST: AnalystDashboard,
-    CUSTOMER: CustomerDashboard,
-  }[userRole]
-
-  if (!DashboardComponent) {
-    return <Navigate to="/login" replace />
-  }
+  const DashboardComponent = ROLE_DASHBOARD[user.role]
+  if (!DashboardComponent) return <Navigate to="/login" replace />
 
   return <DashboardComponent />
 }
